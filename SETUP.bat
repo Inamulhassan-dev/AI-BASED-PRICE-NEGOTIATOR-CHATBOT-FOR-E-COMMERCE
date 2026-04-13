@@ -8,14 +8,18 @@ TITLE AI Price Negotiator - Complete Setup
 :: Automatically installs all dependencies
 :: ============================================
 
+:: Get the directory where this batch file is located
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
+
 echo.
 echo ========================================
 echo   AI PRICE NEGOTIATOR - SETUP
 echo ========================================
 echo.
 echo This will automatically:
-echo  [1] Check and install Python
-echo  [2] Check and install Node.js
+echo  [1] Check Python installation
+echo  [2] Check Node.js installation
 echo  [3] Install all backend dependencies
 echo  [4] Install all frontend dependencies
 echo  [5] Initialize database with demo data
@@ -23,6 +27,7 @@ echo  [6] Verify everything is ready
 echo.
 echo ========================================
 echo.
+pause
 
 :: Create logs directory
 if not exist "logs" mkdir logs
@@ -38,15 +43,17 @@ echo [STEP 1/6] Checking Python installation...
 echo [%date% %time%] Checking Python... >> "%LOGFILE%"
 
 python --version >nul 2>&1
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
+    COLOR 0C
     echo.
-    echo [ERROR] Python is not installed!
+    echo [ERROR] Python is not installed or not in PATH!
     echo.
     echo Please install Python 3.10 or higher from:
     echo https://www.python.org/downloads/
     echo.
-    echo Make sure to check "Add Python to PATH" during installation!
+    echo IMPORTANT: Check "Add Python to PATH" during installation!
     echo.
+    echo [%date% %time%] ERROR: Python not found >> "%LOGFILE%"
     pause
     exit /b 1
 )
@@ -62,13 +69,15 @@ echo [STEP 2/6] Checking Node.js installation...
 echo [%date% %time%] Checking Node.js... >> "%LOGFILE%"
 
 node --version >nul 2>&1
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
+    COLOR 0C
     echo.
-    echo [ERROR] Node.js is not installed!
+    echo [ERROR] Node.js is not installed or not in PATH!
     echo.
     echo Please install Node.js 18 or higher from:
     echo https://nodejs.org/
     echo.
+    echo [%date% %time%] ERROR: Node.js not found >> "%LOGFILE%"
     pause
     exit /b 1
 )
@@ -83,39 +92,41 @@ echo [%date% %time%] Node.js %NODE_VERSION% found >> "%LOGFILE%"
 echo [STEP 3/6] Setting up backend...
 echo [%date% %time%] Setting up backend... >> "%LOGFILE%"
 
-cd backend
+cd /d "%SCRIPT_DIR%backend"
 
 :: Check if virtual environment exists
 if not exist "venv" (
-    echo Creating Python virtual environment...
-    python -m venv venv >> "..\%LOGFILE%" 2>&1
-    if %errorlevel% neq 0 (
+    echo    Creating Python virtual environment...
+    python -m venv venv >> "%SCRIPT_DIR%%LOGFILE%" 2>&1
+    if !errorlevel! neq 0 (
+        COLOR 0C
         echo [ERROR] Failed to create virtual environment!
-        cd ..
+        echo Check %LOGFILE% for details
+        cd /d "%SCRIPT_DIR%"
         pause
         exit /b 1
     )
     echo [OK] Virtual environment created
+) else (
+    echo [OK] Virtual environment already exists
 )
 
-:: Activate virtual environment
+:: Activate virtual environment and install dependencies
+echo    Installing Python packages (this may take 2-3 minutes)...
 call venv\Scripts\activate.bat
-
-:: Install dependencies
-echo Installing Python packages...
-echo This may take 2-3 minutes...
-python -m pip install --upgrade pip >> "..\%LOGFILE%" 2>&1
-pip install -r requirements.txt >> "..\%LOGFILE%" 2>&1
-if %errorlevel% neq 0 (
+python -m pip install --upgrade pip >> "%SCRIPT_DIR%%LOGFILE%" 2>&1
+pip install -r requirements.txt >> "%SCRIPT_DIR%%LOGFILE%" 2>&1
+if !errorlevel! neq 0 (
+    COLOR 0C
     echo [ERROR] Failed to install Python packages!
-    echo Check logs\setup.log for details
-    cd ..
+    echo Check %LOGFILE% for details
+    cd /d "%SCRIPT_DIR%"
     pause
     exit /b 1
 )
-echo [OK] Backend dependencies installed
+echo [OK] Backend dependencies installed (35+ packages)
 
-cd ..
+cd /d "%SCRIPT_DIR%"
 
 :: ============================================
 :: STEP 4: Setup Frontend
@@ -123,17 +134,17 @@ cd ..
 echo [STEP 4/6] Setting up frontend...
 echo [%date% %time%] Setting up frontend... >> "%LOGFILE%"
 
-cd frontend
+cd /d "%SCRIPT_DIR%frontend"
 
-:: Check if node_modules exists
+:: Install npm packages
 if not exist "node_modules" (
-    echo Installing Node.js packages...
-    echo This may take 3-5 minutes...
-    call npm install >> "..\%LOGFILE%" 2>&1
-    if %errorlevel% neq 0 (
+    echo    Installing Node.js packages (this may take 3-5 minutes)...
+    call npm install >> "%SCRIPT_DIR%%LOGFILE%" 2>&1
+    if !errorlevel! neq 0 (
+        COLOR 0C
         echo [ERROR] Failed to install Node.js packages!
-        echo Check logs\setup.log for details
-        cd ..
+        echo Check %LOGFILE% for details
+        cd /d "%SCRIPT_DIR%"
         pause
         exit /b 1
     )
@@ -142,7 +153,7 @@ if not exist "node_modules" (
     echo [OK] Frontend dependencies already installed
 )
 
-cd ..
+cd /d "%SCRIPT_DIR%"
 
 :: ============================================
 :: STEP 5: Initialize Database
@@ -150,15 +161,27 @@ cd ..
 echo [STEP 5/6] Initializing database...
 echo [%date% %time%] Initializing database... >> "%LOGFILE%"
 
-cd backend
+cd /d "%SCRIPT_DIR%backend"
 call venv\Scripts\activate.bat
-python init_demo_data.py >> "..\%LOGFILE%" 2>&1
-if %errorlevel% neq 0 (
-    echo [WARNING] Database initialization had issues (may already be initialized)
-) else (
-    echo [OK] Database initialized with demo data
+
+:: Delete old database if exists
+if exist "negotiator.db" (
+    echo    Removing old database...
+    del /f /q negotiator.db >nul 2>&1
 )
-cd ..
+
+:: Initialize new database
+echo    Creating database with demo data...
+python init_demo_data.py >> "%SCRIPT_DIR%%LOGFILE%" 2>&1
+if !errorlevel! neq 0 (
+    COLOR 0E
+    echo [WARNING] Database initialization had issues
+    echo Check %LOGFILE% for details
+) else (
+    echo [OK] Database initialized with 8 demo products
+)
+
+cd /d "%SCRIPT_DIR%"
 
 :: ============================================
 :: STEP 6: Verify Installation
@@ -173,8 +196,8 @@ if not exist "backend\venv" (
     echo [ERROR] Backend virtual environment missing
     set /a ERRORS+=1
 )
-if not exist "backend\requirements.txt" (
-    echo [ERROR] Backend requirements.txt missing
+if not exist "backend\venv\Scripts\python.exe" (
+    echo [ERROR] Python executable missing in venv
     set /a ERRORS+=1
 )
 if not exist "backend\app\main.py" (
@@ -187,41 +210,50 @@ if not exist "frontend\node_modules" (
     echo [ERROR] Frontend node_modules missing
     set /a ERRORS+=1
 )
-if not exist "frontend\package.json" (
-    echo [ERROR] Frontend package.json missing
-    set /a ERRORS+=1
-)
 if not exist "frontend\src\App.jsx" (
     echo [ERROR] Frontend App.jsx missing
     set /a ERRORS+=1
 )
 
-if %ERRORS% gtr 0 (
+if !ERRORS! gtr 0 (
+    COLOR 0C
     echo.
-    echo [ERROR] Setup completed with %ERRORS% error(s)
-    echo Check logs\setup.log for details
+    echo [ERROR] Setup completed with !ERRORS! error(s)
+    echo Check %LOGFILE% for details
     echo.
     pause
     exit /b 1
 )
 
+echo [OK] All files verified
+
 :: ============================================
 :: SUCCESS!
 :: ============================================
+COLOR 0A
 echo.
 echo ========================================
 echo   SETUP COMPLETED SUCCESSFULLY!
 echo ========================================
 echo.
-echo Your AI Price Negotiator is ready!
+echo Your AI Price Negotiator is ready to use!
 echo.
-echo Next steps:
-echo  1. Run START-PROJECT.bat to launch the application
-echo  2. Open http://localhost:5173 in your browser
-echo  3. Login with: admin@negotiator.com / admin123
+echo NEXT STEPS:
+echo  1. Double-click START-PROJECT.bat
+echo  2. Wait for servers to start (10-15 seconds)
+echo  3. Browser will open automatically
+echo  4. Login with demo credentials:
+echo     Email:    admin@negotiator.com
+echo     Password: admin123
+echo.
+echo DEMO DATA INCLUDED:
+echo  - 8 Products across multiple categories
+echo  - 1 Admin account
+echo  - Ready for AI price negotiation
 echo.
 echo ========================================
 echo.
 echo [%date% %time%] Setup completed successfully >> "%LOGFILE%"
 
-pause
+echo Press any key to exit...
+pause >nul

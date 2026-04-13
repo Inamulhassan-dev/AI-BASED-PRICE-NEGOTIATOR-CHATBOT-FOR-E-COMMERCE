@@ -1,11 +1,15 @@
 @echo off
 SETLOCAL EnableDelayedExpansion
-COLOR 0C
+COLOR 0E
 TITLE AI Price Negotiator - Stopping...
 
 :: ============================================
-:: STOP-PROJECT.BAT - Stop All Servers & Clean
+:: STOP-PROJECT.BAT - Stop All Servers
 :: ============================================
+
+:: Get the directory where this batch file is located
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
 
 echo.
 echo ========================================
@@ -21,117 +25,128 @@ set LOGFILE=%LOGFILE: =0%
 echo [%date% %time%] Stopping project... > "%LOGFILE%"
 
 :: ============================================
-:: Stop All Node.js Processes
+:: Kill processes by port
 :: ============================================
-echo [1/5] Stopping Node.js processes...
-echo [%date% %time%] Stopping Node.js... >> "%LOGFILE%"
+echo [1/4] Stopping servers by port...
+echo [%date% %time%] Stopping servers... >> "%LOGFILE%"
 
-tasklist | findstr /i "node.exe" >nul 2>&1
-if %errorlevel% equ 0 (
-    taskkill /F /IM node.exe >nul 2>&1
-    echo [OK] Node.js processes stopped
-) else (
-    echo [OK] No Node.js processes running
-)
+set KILLED=0
 
-:: ============================================
-:: Stop All Python Processes
-:: ============================================
-echo [2/5] Stopping Python processes...
-echo [%date% %time%] Stopping Python... >> "%LOGFILE%"
-
-tasklist | findstr /i "python.exe" >nul 2>&1
-if %errorlevel% equ 0 (
-    taskkill /F /IM python.exe >nul 2>&1
-    echo [OK] Python processes stopped
-) else (
-    echo [OK] No Python processes running
-)
-
-:: ============================================
-:: Free Ports
-:: ============================================
-echo [3/5] Freeing ports 5173 and 8000...
-echo [%date% %time%] Freeing ports... >> "%LOGFILE%"
-
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173') do (
+:: Kill processes on port 5173 (Frontend)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING') do (
+    echo    Stopping Frontend (Port 5173, PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo [OK] Frontend stopped
+        set /a KILLED+=1
+        echo [%date% %time%] Killed Frontend PID %%a >> "%LOGFILE%"
+    )
 )
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000') do (
+:: Kill processes on port 8000 (Backend)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    echo    Stopping Backend (Port 8000, PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo [OK] Backend stopped
+        set /a KILLED+=1
+        echo [%date% %time%] Killed Backend PID %%a >> "%LOGFILE%"
+    )
 )
 
-echo [OK] Ports freed
-
-:: ============================================
-:: Clean Temporary Files
-:: ============================================
-echo [4/5] Cleaning temporary files...
-echo [%date% %time%] Cleaning temp files... >> "%LOGFILE%"
-
-:: Clean Python cache
-if exist "backend\__pycache__" (
-    rd /s /q "backend\__pycache__" 2>nul
+if !KILLED! equ 0 (
+    echo [INFO] No servers were running
 )
-for /d /r "backend" %%d in (__pycache__) do @if exist "%%d" rd /s /q "%%d" 2>nul
 
-:: Clean Python .pyc files
-del /s /q "backend\*.pyc" >nul 2>&1
+:: ============================================
+:: Kill processes by window title
+:: ============================================
+echo [2/4] Stopping servers by window title...
 
-:: Clean old log files (keep last 10)
-cd logs 2>nul
-if exist "*.log" (
-    for /f "skip=10 delims=" %%f in ('dir /b /o-d *.log 2^>nul') do del "%%f" 2>nul
+taskkill /FI "WINDOWTITLE eq AI Negotiator - Backend*" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq AI Negotiator - Frontend*" /F >nul 2>&1
+
+:: ============================================
+:: Kill Node and Python processes (optional)
+:: ============================================
+echo [3/4] Cleaning up related processes...
+
+:: Kill uvicorn processes
+taskkill /F /IM uvicorn.exe >nul 2>&1
+
+:: Kill node processes running on our ports
+for /f "tokens=2" %%a in ('tasklist ^| findstr node.exe') do (
+    netstat -ano | findstr :5173 | findstr %%a >nul 2>&1
+    if !errorlevel! equ 0 (
+        taskkill /F /PID %%a >nul 2>&1
+    )
 )
-cd ..
 
-echo [OK] Temporary files cleaned
+echo [OK] Cleanup complete
 
 :: ============================================
-:: Optional: Clean Build Files
+:: Verify ports are free
 :: ============================================
-echo [5/5] Do you want to clean build files? (This will require re-running SETUP.bat)
+echo [4/4] Verifying ports are free...
+
+netstat -ano | findstr :5173 | findstr LISTENING >nul 2>&1
+if !errorlevel! equ 0 (
+    COLOR 0C
+    echo [WARNING] Port 5173 is still in use
+    echo You may need to restart your computer
+) else (
+    echo [OK] Port 5173 is free
+)
+
+netstat -ano | findstr :8000 | findstr LISTENING >nul 2>&1
+if !errorlevel! equ 0 (
+    COLOR 0C
+    echo [WARNING] Port 8000 is still in use
+    echo You may need to restart your computer
+) else (
+    echo [OK] Port 8000 is free
+)
+
+:: ============================================
+:: Optional: Clean temporary files
+:: ============================================
 echo.
-echo Options:
-echo   [1] No - Keep everything (recommended)
-echo   [2] Yes - Clean node_modules and venv (saves space)
-echo.
-set /p CLEAN_CHOICE="Enter choice (1 or 2): "
+echo Do you want to clean temporary files? (Y/N)
+set /p CLEAN="Enter choice: "
 
-if "%CLEAN_CHOICE%"=="2" (
+if /i "!CLEAN!"=="Y" (
     echo.
-    echo Cleaning build files...
+    echo Cleaning temporary files...
     
-    if exist "frontend\node_modules" (
-        echo Removing frontend\node_modules...
-        rd /s /q "frontend\node_modules" 2>nul
-        echo [OK] node_modules removed
+    :: Clean Python cache
+    if exist "backend\__pycache__" (
+        rd /s /q "backend\__pycache__" 2>nul
+        echo [OK] Cleaned backend __pycache__
     )
     
-    if exist "backend\venv" (
-        echo Removing backend\venv...
-        rd /s /q "backend\venv" 2>nul
-        echo [OK] venv removed
+    for /d /r "backend" %%d in (__pycache__) do (
+        if exist "%%d" rd /s /q "%%d" 2>nul
     )
     
-    echo.
-    echo [WARNING] Build files removed!
-    echo Run SETUP.bat before starting the project again.
-) else (
-    echo [OK] Build files kept
+    :: Clean frontend cache
+    if exist "frontend\.vite" (
+        rd /s /q "frontend\.vite" 2>nul
+        echo [OK] Cleaned frontend .vite cache
+    )
+    
+    echo [OK] Temporary files cleaned
 )
 
 :: ============================================
 :: SUCCESS!
 :: ============================================
+COLOR 0A
 echo.
 echo ========================================
-echo   PROJECT STOPPED SUCCESSFULLY!
+echo   ALL SERVERS STOPPED!
 echo ========================================
 echo.
-echo All servers have been stopped.
-echo Temporary files have been cleaned.
+echo Ports 5173 and 8000 are now free.
 echo.
 echo To start again, run START-PROJECT.bat
 echo.
@@ -139,4 +154,5 @@ echo ========================================
 echo.
 echo [%date% %time%] Project stopped successfully >> "%LOGFILE%"
 
-pause
+echo Press any key to exit...
+pause >nul

@@ -7,6 +7,10 @@ TITLE AI Price Negotiator - Starting...
 :: START-PROJECT.BAT - Start All Servers
 :: ============================================
 
+:: Get the directory where this batch file is located
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
+
 echo.
 echo ========================================
 echo   AI PRICE NEGOTIATOR - STARTING
@@ -23,36 +27,49 @@ echo [%date% %time%] Starting project... > "%LOGFILE%"
 :: ============================================
 :: Check if setup was run
 :: ============================================
+echo [1/5] Checking setup...
 if not exist "backend\venv" (
-    echo [ERROR] Backend not set up!
-    echo Please run SETUP.bat first
+    COLOR 0C
     echo.
+    echo [ERROR] Backend virtual environment not found!
+    echo Please run SETUP.bat first to install dependencies.
+    echo.
+    echo [%date% %time%] ERROR: Backend not set up >> "%LOGFILE%"
     pause
     exit /b 1
 )
 
 if not exist "frontend\node_modules" (
-    echo [ERROR] Frontend not set up!
-    echo Please run SETUP.bat first
+    COLOR 0C
     echo.
+    echo [ERROR] Frontend node_modules not found!
+    echo Please run SETUP.bat first to install dependencies.
+    echo.
+    echo [%date% %time%] ERROR: Frontend not set up >> "%LOGFILE%"
     pause
     exit /b 1
 )
 
+echo [OK] Setup verified
+
 :: ============================================
 :: Kill any existing processes on ports
 :: ============================================
-echo [1/4] Checking ports...
+echo [2/5] Checking and clearing ports...
 echo [%date% %time%] Checking ports... >> "%LOGFILE%"
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173') do (
-    echo Killing process on port 5173...
+:: Kill processes on port 5173 (Frontend)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING') do (
+    echo    Killing process on port 5173 (PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
+    echo [%date% %time%] Killed PID %%a on port 5173 >> "%LOGFILE%"
 )
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000') do (
-    echo Killing process on port 8000...
+:: Kill processes on port 8000 (Backend)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    echo    Killing process on port 8000 (PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
+    echo [%date% %time%] Killed PID %%a on port 8000 >> "%LOGFILE%"
 )
 
 echo [OK] Ports cleared
@@ -60,36 +77,45 @@ echo [OK] Ports cleared
 :: ============================================
 :: Start Backend Server
 :: ============================================
-echo [2/4] Starting backend server...
+echo [3/5] Starting backend server...
 echo [%date% %time%] Starting backend... >> "%LOGFILE%"
 
-cd backend
-start "AI Negotiator - Backend" cmd /k "call venv\Scripts\activate.bat && python -m uvicorn app.main:app --reload --port 8000"
-cd ..
+:: Start backend in a new window
+start "AI Negotiator - Backend (Port 8000)" cmd /k "cd /d "%SCRIPT_DIR%backend" && venv\Scripts\activate.bat && python -m uvicorn app.main:app --reload --port 8000"
 
 echo [OK] Backend starting on http://localhost:8000
 
-:: Wait for backend to start
-timeout /t 3 /nobreak >nul
+:: Wait for backend to initialize
+echo    Waiting for backend to initialize...
+timeout /t 5 /nobreak >nul
 
 :: ============================================
 :: Start Frontend Server
 :: ============================================
-echo [3/4] Starting frontend server...
+echo [4/5] Starting frontend server...
 echo [%date% %time%] Starting frontend... >> "%LOGFILE%"
 
-cd frontend
-start "AI Negotiator - Frontend" cmd /k "npm run dev"
-cd ..
+:: Start frontend in a new window
+start "AI Negotiator - Frontend (Port 5173)" cmd /k "cd /d "%SCRIPT_DIR%frontend" && npm run dev"
 
 echo [OK] Frontend starting on http://localhost:5173
 
 :: ============================================
 :: Wait and Open Browser
 :: ============================================
-echo [4/4] Waiting for servers to start...
+echo [5/5] Waiting for servers to fully start...
+echo    This may take 10-15 seconds...
 
-timeout /t 5 /nobreak >nul
+timeout /t 10 /nobreak >nul
+
+:: Check if backend is responding
+echo    Checking backend health...
+curl -s http://localhost:8000/health >nul 2>&1
+if !errorlevel! equ 0 (
+    echo [OK] Backend is responding
+) else (
+    echo [WARNING] Backend may still be starting...
+)
 
 echo.
 echo ========================================
@@ -100,21 +126,32 @@ echo Backend:  http://localhost:8000
 echo Frontend: http://localhost:5173
 echo API Docs: http://localhost:8000/docs
 echo.
-echo Demo Login:
-echo   Email: admin@negotiator.com
+echo Demo Login Credentials:
+echo   Email:    admin@negotiator.com
 echo   Password: admin123
 echo.
 echo ========================================
 echo.
-echo Opening browser...
-echo.
+echo Opening browser in 3 seconds...
+timeout /t 3 /nobreak >nul
 
 :: Open browser
 start http://localhost:5173
 
-echo [%date% %time%] Project started successfully >> "%LOGFILE%"
-
-echo To stop the servers, run STOP-PROJECT.bat
 echo.
-echo Press any key to keep this window open...
+echo [%date% %time%] Project started successfully >> "%LOGFILE%"
+echo.
+echo ========================================
+echo   IMPORTANT NOTES:
+echo ========================================
+echo.
+echo - Two new windows opened (Backend and Frontend)
+echo - Keep those windows open while using the app
+echo - To stop servers, run STOP-PROJECT.bat
+echo - Or close the Backend and Frontend windows
+echo.
+echo ========================================
+echo.
+echo This window can be closed now.
+echo Press any key to close...
 pause >nul

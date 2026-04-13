@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { @apply bg-gray-100 dark:bg-gray-800; }
+::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-600 rounded; }
+
+.gradient-bg { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+}
+
+.card-shadow { 
+  @apply shadow-lg dark:shadow-gray-900/50;
+}
+
+

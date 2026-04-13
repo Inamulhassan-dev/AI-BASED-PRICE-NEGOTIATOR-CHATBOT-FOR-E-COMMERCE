@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Flickering</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f3f4f6;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .success {
+            color: #10b981;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Flickering Issue</h1>
+        <p>Click the button below to clear all cached data and fix the flickering.</p>
+        <button onclick="fixFlickering()">Clear Cache & Fix</button>
+        <p class="success" id="success">✅ Fixed! Redirecting...</p>
+    </div>
+
+    <script>
+        function fixFlickering() {
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Clear sessionStorage
+            sessionStorage.clear();
+            
+            // Set theme to light by default
+            localStorage.setItem('theme', 'light');
+            
+            // Show success message
+            document.getElementById('success').style.display = 'block';
+            
+            // Redirect to home after 1 second
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

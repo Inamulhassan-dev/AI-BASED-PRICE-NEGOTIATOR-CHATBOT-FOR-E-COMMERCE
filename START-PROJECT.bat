@@ -19,23 +19,50 @@ echo.
 
 :: Create logs directory
 if not exist "logs" mkdir logs
-set LOGFILE=logs\start_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.log
-set LOGFILE=%LOGFILE: =0%
+set LOGFILE=logs\start.log
 
 echo [%date% %time%] Starting project... > "%LOGFILE%"
+echo Starting project... Please wait...
+echo.
 
 :: ============================================
 :: Check if setup was run
 :: ============================================
 echo [1/5] Checking setup...
+
+if not exist "backend" (
+    COLOR 0C
+    echo.
+    echo [ERROR] Backend folder not found!
+    echo Make sure you are in the correct directory.
+    echo Current directory: %CD%
+    echo.
+    echo Press any key to exit...
+    pause >nul
+    exit /b 1
+)
+
+if not exist "frontend" (
+    COLOR 0C
+    echo.
+    echo [ERROR] Frontend folder not found!
+    echo Make sure you are in the correct directory.
+    echo Current directory: %CD%
+    echo.
+    echo Press any key to exit...
+    pause >nul
+    exit /b 1
+)
+
 if not exist "backend\venv" (
     COLOR 0C
     echo.
     echo [ERROR] Backend virtual environment not found!
+    echo.
     echo Please run SETUP.bat first to install dependencies.
     echo.
-    echo [%date% %time%] ERROR: Backend not set up >> "%LOGFILE%"
-    pause
+    echo Press any key to exit...
+    pause >nul
     exit /b 1
 )
 
@@ -43,79 +70,102 @@ if not exist "frontend\node_modules" (
     COLOR 0C
     echo.
     echo [ERROR] Frontend node_modules not found!
+    echo.
     echo Please run SETUP.bat first to install dependencies.
     echo.
-    echo [%date% %time%] ERROR: Frontend not set up >> "%LOGFILE%"
-    pause
+    echo Press any key to exit...
+    pause >nul
     exit /b 1
 )
 
 echo [OK] Setup verified
+echo.
 
 :: ============================================
 :: Kill any existing processes on ports
 :: ============================================
 echo [2/5] Checking and clearing ports...
-echo [%date% %time%] Checking ports... >> "%LOGFILE%"
 
 :: Kill processes on port 5173 (Frontend)
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5173 ^| findstr LISTENING 2^>nul') do (
     echo    Killing process on port 5173 (PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
-    echo [%date% %time%] Killed PID %%a on port 5173 >> "%LOGFILE%"
 )
 
 :: Kill processes on port 8000 (Backend)
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING 2^>nul') do (
     echo    Killing process on port 8000 (PID: %%a)...
     taskkill /F /PID %%a >nul 2>&1
-    echo [%date% %time%] Killed PID %%a on port 8000 >> "%LOGFILE%"
 )
 
 echo [OK] Ports cleared
+echo.
 
 :: ============================================
 :: Start Backend Server
 :: ============================================
 echo [3/5] Starting backend server...
-echo [%date% %time%] Starting backend... >> "%LOGFILE%"
+
+:: Check if Python is available
+python --version >nul 2>&1
+if !errorlevel! neq 0 (
+    COLOR 0C
+    echo.
+    echo [ERROR] Python is not installed or not in PATH!
+    echo.
+    echo Please install Python 3.10+ from: https://www.python.org/downloads/
+    echo Make sure to check "Add Python to PATH" during installation.
+    echo.
+    echo Press any key to exit...
+    pause >nul
+    exit /b 1
+)
 
 :: Start backend in a new window
 start "AI Negotiator - Backend (Port 8000)" cmd /k "cd /d "%SCRIPT_DIR%backend" && venv\Scripts\activate.bat && python -m uvicorn app.main:app --reload --port 8000"
 
 echo [OK] Backend starting on http://localhost:8000
+echo    (A new window opened for the backend server)
+echo.
 
 :: Wait for backend to initialize
-echo    Waiting for backend to initialize...
+echo    Waiting for backend to initialize (5 seconds)...
 timeout /t 5 /nobreak >nul
 
 :: ============================================
 :: Start Frontend Server
 :: ============================================
 echo [4/5] Starting frontend server...
-echo [%date% %time%] Starting frontend... >> "%LOGFILE%"
+
+:: Check if Node.js is available
+node --version >nul 2>&1
+if !errorlevel! neq 0 (
+    COLOR 0C
+    echo.
+    echo [ERROR] Node.js is not installed or not in PATH!
+    echo.
+    echo Please install Node.js 18+ from: https://nodejs.org/
+    echo.
+    echo Press any key to exit...
+    pause >nul
+    exit /b 1
+)
 
 :: Start frontend in a new window
 start "AI Negotiator - Frontend (Port 5173)" cmd /k "cd /d "%SCRIPT_DIR%frontend" && npm run dev"
 
 echo [OK] Frontend starting on http://localhost:5173
+echo    (A new window opened for the frontend server)
+echo.
 
 :: ============================================
 :: Wait and Open Browser
 :: ============================================
 echo [5/5] Waiting for servers to fully start...
 echo    This may take 10-15 seconds...
+echo.
 
 timeout /t 10 /nobreak >nul
-
-:: Check if backend is responding
-echo    Checking backend health...
-curl -s http://localhost:8000/health >nul 2>&1
-if !errorlevel! equ 0 (
-    echo [OK] Backend is responding
-) else (
-    echo [WARNING] Backend may still be starting...
-)
 
 echo.
 echo ========================================
@@ -132,8 +182,7 @@ echo   Password: admin123
 echo.
 echo ========================================
 echo.
-echo Opening browser in 3 seconds...
-timeout /t 3 /nobreak >nul
+echo Opening browser...
 
 :: Open browser
 start http://localhost:5173
@@ -146,12 +195,12 @@ echo   IMPORTANT NOTES:
 echo ========================================
 echo.
 echo - Two new windows opened (Backend and Frontend)
-echo - Keep those windows open while using the app
+echo - Keep those windows OPEN while using the app
 echo - To stop servers, run STOP-PROJECT.bat
 echo - Or close the Backend and Frontend windows
 echo.
 echo ========================================
 echo.
-echo This window can be closed now.
-echo Press any key to close...
-pause >nul
+echo This window will close in 10 seconds...
+echo Or press any key to close now...
+timeout /t 10 >nul

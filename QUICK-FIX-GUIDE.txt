@@ -1,0 +1,93 @@
+========================================
+  QUICK FIX GUIDE
+  If START-PROJECT.bat is blinking/closing
+========================================
+
+STEP 1: Test Your System
+-------------------------
+Double-click: TEST-SYSTEM.bat
+
+This will check:
+- If Python is installed
+- If Node.js is installed
+- If SETUP.bat was run
+- If ports are free
+
+Look for any [ERROR] messages and fix them first.
+
+
+STEP 2: Run Setup (If Needed)
+------------------------------
+If TEST-SYSTEM.bat shows errors, run:
+
+Double-click: SETUP.bat
+
+Wait for it to complete (5-10 minutes).
+Look for "SETUP COMPLETED SUCCESSFULLY!"
+
+
+STEP 3: Try Simple Start
+-------------------------
+Instead of START-PROJECT.bat, try:
+
+Double-click: START-SIMPLE.bat
+
+This is a simpler version that:
+- Shows more messages
+- Pauses on errors
+- Won't close immediately
+
+
+STEP 4: Manual Start (If All Else Fails)
+-----------------------------------------
+If batch files don't work, start manually:
+
+A) Start Backend:
+   1. Open Command Prompt
+   2. cd D:\ARSHIYA\backend
+   3. venv\Scripts\activate
+   4. python -m uvicorn app.main:app --reload --port 8000
+   5. Keep this window open
+
+B) Start Frontend:
+   1. Open another Command Prompt
+   2. cd D:\ARSHIYA\frontend
+   3. npm run dev
+   4. Keep this window open
+
+C) Open Browser:
+   Go to: http://localhost:5173
+
+
+COMMON ISSUES:
+--------------
+
+Issue: "Python is not recognized"
+Fix: Install Python from https://www.python.org/downloads/
+     Make sure to check "Add Python to PATH"
+
+Issue: "Node is not recognized"
+Fix: Install Node.js from https://nodejs.org/
+
+Issue: "Backend not set up"
+Fix: Run SETUP.bat first
+
+Issue: "Port already in use"
+Fix: Run STOP-PROJECT.bat first
+
+Issue: Batch file closes immediately
+Fix: 1. Run TEST-SYSTEM.bat to see the error
+     2. Try START-SIMPLE.bat instead
+     3. Or start manually (see Step 4 above)
+
+
+NEED MORE HELP?
+---------------
+1. Check TROUBLESHOOTING.md
+2. Check logs/ folder for error messages
+3. Email: inamulhassan.dev@gmail.com
+
+
+========================================
+TIP: Always run SETUP.bat before first use!
+========================================

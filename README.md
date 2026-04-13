@@ -1,214 +1,355 @@
-# 🤖 AI Price Negotiator - E-Commerce Platform
+# 🤖 AI-Based Price Negotiator Chatbot for E-Commerce
 
-An intelligent e-commerce platform with AI-powered price negotiation chatbot that helps customers get the best deals through real-time conversation.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![React](https://img.shields.io/badge/React-18.0+-61DAFB.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com/)
 
-## ✨ Features
+A cutting-edge full-stack e-commerce platform featuring an intelligent AI chatbot that negotiates prices in real-time, providing personalized discounts and enhancing customer engagement.
 
-- 🛍️ **Full E-Commerce** - Product catalog, shopping cart, checkout
-- 🤖 **AI Negotiation** - Smart chatbot negotiates prices in real-time
-- 🎨 **Dark/Light Theme** - Beautiful UI with theme persistence
-- 👤 **User Authentication** - Secure JWT-based auth system
-- 📊 **Admin Dashboard** - Analytics and negotiation tracking
-- 💬 **Real-time Chat** - WebSocket-powered instant messaging
-- 📱 **Responsive Design** - Works on all devices
+![AI Price Negotiator](https://img.shields.io/badge/AI-Powered-purple?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
+
+---
+
+## 🌟 Key Features
+
+### 🎯 AI-Powered Negotiation
+- **Smart Price Negotiation**: AI chatbot analyzes cart value, user behavior, and product margins to offer dynamic discounts (5-25%)
+- **Intent Detection**: Recognizes 7 types of user intents (greeting, price inquiry, negotiation, acceptance, rejection, product query, general)
+- **Sentiment Analysis**: Adjusts negotiation strategy based on customer sentiment
+- **Multi-Round Negotiation**: Supports iterative negotiation with intelligent counter-offers
+- **Time-Limited Offers**: Creates urgency with expiring deals
+
+### 🛒 E-Commerce Core
+- **Product Catalog**: Browse 8+ demo products across multiple categories
+- **Smart Search & Filters**: Search by name, filter by category, price range
+- **Shopping Cart**: Real-time cart management with negotiated pricing
+- **User Authentication**: Secure JWT-based auth with bcrypt password hashing
+- **Admin Dashboard**: Comprehensive analytics and negotiation tracking
+
+### 🎨 Modern UI/UX
+- **Dark/Light Theme**: Seamless theme toggle with localStorage persistence
+- **Responsive Design**: Mobile-first design that works on all devices
+- **Smooth Animations**: Framer Motion animations for delightful interactions
+- **Real-Time Chat**: WebSocket-powered chatbot with typing indicators
+- **Beautiful Gradients**: Modern purple-indigo gradient design system
+
+### 📊 Analytics & Insights
+- **Negotiation Metrics**: Track conversion rates, average discounts, total savings
+- **User Analytics**: Monitor user behavior and engagement
+- **Product Performance**: Analyze which products get negotiated most
+- **Visual Dashboards**: Charts and graphs powered by Recharts
+
+---
 
 ## 🚀 Quick Start
 
-### For New Users (First Time Setup)
+### Prerequisites
+- **Python 3.11+** - [Download](https://www.python.org/downloads/)
+- **Node.js 18+** - [Download](https://nodejs.org/)
+- **Git** - [Download](https://git-scm.com/)
+
+### 🎬 One-Click Setup (Windows)
 
 1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd ai-price-negotiator
-   ```
+```bash
+git clone https://github.com/Inamulhassan-dev/AI-BASED-PRICE-NEGOTIATOR-CHATBOT-FOR-E-COMMERCE.git
+cd AI-BASED-PRICE-NEGOTIATOR-CHATBOT-FOR-E-COMMERCE
+```
 
-2. **Run Setup** (One-time only)
-   ```bash
-   SETUP.bat
-   ```
-   This will automatically:
-   - Check Python and Node.js installation
-   - Install all backend dependencies
-   - Install all frontend dependencies
-   - Initialize database with demo products
-   - Verify everything is ready
+2. **Run automated setup**
+```bash
+SETUP.bat
+```
+This will automatically:
+- Check for Python and Node.js
+- Create virtual environment
+- Install all dependencies (35+ packages)
+- Initialize database with demo data
+- Verify installation
 
-3. **Start the Project**
-   ```bash
-   START-PROJECT.bat
-   ```
-   - Starts backend server (http://localhost:8000)
-   - Starts frontend server (http://localhost:5173)
-   - Opens browser automatically
+3. **Start the project**
+```bash
+START-PROJECT.bat
+```
+This will:
+- Start backend server (port 8000)
+- Start frontend server (port 5173)
+- Open browser automatically
 
-4. **Stop the Project**
-   ```bash
-   STOP-PROJECT.bat
-   ```
-   - Stops all servers
-   - Cleans temporary files
-   - Frees ports
+4. **Access the application**
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
 
-## 📋 Requirements
+### 🔐 Demo Credentials
+```
+Email: admin@negotiator.com
+Password: admin123
+```
 
-- **Python 3.10+** - [Download](https://www.python.org/downloads/)
-- **Node.js 18+** - [Download](https://nodejs.org/)
-- **Windows OS** - Batch files are for Windows
+---
 
-## 🎯 Demo Credentials
+## 🛠️ Manual Setup
 
-**Admin Account:**
-- Email: `admin@negotiator.com`
-- Password: `admin123`
+### Backend Setup
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+python init_demo_data.py
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
-ai-price-negotiator/
-├── backend/              # FastAPI backend
+AI-BASED-PRICE-NEGOTIATOR/
+├── backend/                    # FastAPI Backend
 │   ├── app/
-│   │   ├── api/         # API endpoints
-│   │   ├── core/        # Config, database, security
-│   │   ├── models/      # SQLAlchemy models
-│   │   ├── schemas/     # Pydantic schemas
-│   │   └── services/    # Business logic
-│   ├── venv/            # Python virtual environment
-│   └── requirements.txt # Python dependencies
+│   │   ├── api/               # API Routes
+│   │   │   ├── auth.py        # Authentication endpoints
+│   │   │   ├── products.py    # Product CRUD
+│   │   │   ├── cart.py        # Cart management
+│   │   │   ├── chatbot.py     # AI negotiation logic
+│   │   │   └── analytics.py   # Admin analytics
+│   │   ├── core/              # Core configurations
+│   │   │   ├── config.py      # App settings
+│   │   │   ├── database.py    # SQLAlchemy setup
+│   │   │   └── security.py    # JWT & bcrypt
+│   │   ├── models/            # Database models
+│   │   │   ├── user.py
+│   │   │   ├── product.py
+│   │   │   ├── cart.py
+│   │   │   └── negotiation.py
+│   │   ├── schemas/           # Pydantic schemas
+│   │   └── services/          # Business logic
+│   │       ├── nlp_service.py          # Intent & sentiment
+│   │       ├── negotiation_engine.py   # Pricing logic
+│   │       └── customer_analysis.py    # User profiling
+│   ├── requirements.txt
+│   └── init_demo_data.py
 │
-├── frontend/            # React frontend
+├── frontend/                   # React Frontend
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── context/     # React context (Auth, Cart, Theme)
-│   │   ├── pages/       # Page components
-│   │   ├── services/    # API services
-│   │   └── styles/      # Global styles
-│   ├── node_modules/    # Node dependencies
-│   └── package.json     # Node dependencies
+│   │   ├── components/
+│   │   │   ├── chatbot/       # Chat components
+│   │   │   ├── common/        # Header, ThemeToggle
+│   │   │   └── products/      # Product cards
+│   │   ├── context/           # React Context
+│   │   │   ├── AuthContext.jsx
+│   │   │   ├── CartContext.jsx
+│   │   │   └── ThemeContext.jsx
+│   │   ├── pages/             # Route pages
+│   │   │   ├── Home.jsx
+│   │   │   ├── Shop.jsx
+│   │   │   ├── ProductPage.jsx
+│   │   │   ├── CartPage.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   └── AdminPage.jsx
+│   │   ├── services/          # API client
+│   │   └── styles/            # Global CSS
+│   ├── package.json
+│   └── tailwind.config.js
 │
-├── docs/                # Documentation
-├── logs/                # Application logs
-│
-├── SETUP.bat           # One-time setup
-├── START-PROJECT.bat   # Start servers
-└── STOP-PROJECT.bat    # Stop servers
+├── docs/                       # Documentation
+├── SETUP.bat                   # Automated setup
+├── START-PROJECT.bat           # Start servers
+├── STOP-PROJECT.bat            # Stop servers
+└── README.md
 ```
 
-## 🛠️ Technology Stack
+---
+
+## 🧠 AI Negotiation Engine
+
+### How It Works
+
+1. **Intent Detection**
+   - Analyzes user messages to understand intent
+   - Supports: greeting, price_inquiry, negotiation_request, acceptance, rejection, product_query, general
+
+2. **Sentiment Analysis**
+   - Detects positive, negative, or neutral sentiment
+   - Adjusts discount offers based on customer mood
+
+3. **Dynamic Pricing**
+   - Base discount: 5-10%
+   - Cart value bonus: +5% for orders >₹5000
+   - Loyalty bonus: +3% for returning customers
+   - Sentiment bonus: +2% for positive sentiment
+   - Maximum discount: 25%
+
+4. **Negotiation Strategy**
+   - Round 1: Conservative offer (5-10%)
+   - Round 2: Moderate increase (+3-5%)
+   - Round 3+: Final best offer (up to 25%)
+
+---
+
+## 🎨 Tech Stack
 
 ### Backend
 - **FastAPI** - Modern Python web framework
-- **SQLAlchemy** - ORM for database
-- **SQLite** - Database
-- **JWT** - Authentication
+- **SQLAlchemy** - ORM for database operations
+- **Pydantic** - Data validation
 - **bcrypt** - Password hashing
-- **WebSocket** - Real-time communication
+- **JWT** - Token-based authentication
+- **SQLite** - Lightweight database
 
 ### Frontend
 - **React 18** - UI library
 - **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **Framer Motion** - Animations
+- **Tailwind CSS** - Utility-first CSS
+- **Framer Motion** - Animation library
+- **Lucide React** - Icon library
 - **React Router** - Navigation
 - **Axios** - HTTP client
-
-## 📖 Documentation
-
-All documentation is in the `docs/` folder:
-
-- `API.md` - API endpoints documentation
-- `FEATURES.md` - Detailed features list
-- `DEPLOYMENT.md` - Deployment guide
-- `THEME_IMPLEMENTATION.md` - Theme system docs
-- And more...
-
-## 🎨 Features in Detail
-
-### AI Price Negotiation
-- Sentiment analysis of customer messages
-- Dynamic discount calculation based on:
-  - Cart value
-  - Customer loyalty
-  - Negotiation rounds
-  - Product margins
-- Time-limited offers
-- Real-time chat interface
-
-### E-Commerce
-- Product browsing with filters
-- Shopping cart management
-- User authentication
-- Order summary
-- Admin analytics dashboard
-
-### Theme System
-- Dark and light modes
-- Smooth transitions
-- Persists in localStorage
-- System preference detection
-
-## 🔧 Development
-
-### Backend Development
-```bash
-cd backend
-venv\Scripts\activate
-python -m uvicorn app.main:app --reload
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm run dev
-```
-
-### Database Reset
-```bash
-cd backend
-venv\Scripts\activate
-python init_demo_data.py
-```
-
-## 📊 Demo Products
-
-The setup includes 8 demo products:
-1. Premium Wireless Headphones - ₹4,999
-2. Smart Fitness Watch - ₹3,499
-3. Leather Laptop Bag - ₹2,999
-4. Portable Bluetooth Speaker - ₹1,999
-5. Ergonomic Office Chair - ₹8,999
-6. Stainless Steel Water Bottle - ₹799
-7. Wireless Gaming Mouse - ₹2,499
-8. Cotton T-Shirt Pack - ₹1,499
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Troubleshooting
-
-### Port Already in Use
-Run `STOP-PROJECT.bat` to free ports 5173 and 8000
-
-### Setup Fails
-- Ensure Python 3.10+ is installed
-- Ensure Node.js 18+ is installed
-- Check `logs/setup.log` for details
-
-### Database Issues
-Delete `backend/negotiator.db` and run setup again
-
-## 📞 Support
-
-For issues and questions, check the `docs/` folder or create an issue on GitHub.
+- **React Hot Toast** - Notifications
+- **Recharts** - Data visualization
 
 ---
 
-**Made with ❤️ using FastAPI, React, and AI**
+## 📊 API Endpoints
+
+### Authentication
+- `POST /auth/register` - Create new account
+- `POST /auth/login` - Login user
+- `GET /auth/me` - Get current user
+
+### Products
+- `GET /products/` - List all products (with filters)
+- `GET /products/{id}` - Get product details
+- `GET /products/categories/list` - Get all categories
+
+### Cart
+- `GET /cart/` - Get user's cart
+- `POST /cart/items` - Add item to cart
+- `DELETE /cart/items/{id}` - Remove item
+
+### Chatbot
+- `POST /chatbot/message` - Send message to AI
+- `POST /chatbot/accept-offer` - Accept negotiated price
+
+### Analytics (Admin)
+- `GET /analytics/dashboard` - Get dashboard stats
+- `GET /analytics/negotiations` - List negotiations
+
+Full API documentation: http://localhost:8000/docs
+
+---
+
+## 🎯 Use Cases
+
+1. **E-Commerce Stores**: Reduce cart abandonment with personalized discounts
+2. **Retail Platforms**: Automate price negotiation at scale
+3. **Marketplace Apps**: Enhance buyer-seller interactions
+4. **Customer Engagement**: Increase conversion rates with AI-driven deals
+5. **Price Optimization**: Test different pricing strategies
+
+---
+
+## 🔧 Configuration
+
+### Backend Configuration
+Edit `backend/app/core/config.py`:
+```python
+SECRET_KEY = "your-secret-key"
+DATABASE_URL = "sqlite:///./negotiator.db"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+```
+
+### Frontend Configuration
+Edit `frontend/src/services/api.js`:
+```javascript
+const API_BASE_URL = 'http://localhost:8000'
+```
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+docker-compose up -d
+```
+
+This will start:
+- Backend on port 8000
+- Frontend on port 5173
+- PostgreSQL database (production)
+
+---
+
+## 📝 Batch Files Guide
+
+- **SETUP.bat** - First-time setup with dependency installation
+- **START-PROJECT.bat** - Start both servers with health checks
+- **STOP-PROJECT.bat** - Stop all servers and free ports
+- **CLEANUP-FOR-GIT.bat** - Clean temporary files before commit
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Inamul Hassan**
+- GitHub: [@Inamulhassan-dev](https://github.com/Inamulhassan-dev)
+- Email: inamulhassan.dev@gmail.com
+
+---
+
+## 🙏 Acknowledgments
+
+- FastAPI for the amazing backend framework
+- React team for the powerful UI library
+- Tailwind CSS for the utility-first approach
+- All open-source contributors
+
+---
+
+## 📞 Support
+
+If you encounter any issues or have questions:
+1. Check the [Documentation](docs/)
+2. Open an [Issue](https://github.com/Inamulhassan-dev/AI-BASED-PRICE-NEGOTIATOR-CHATBOT-FOR-E-COMMERCE/issues)
+3. Contact: inamulhassan.dev@gmail.com
+
+---
+
+## ⭐ Star This Repository
+
+If you find this project useful, please give it a star! It helps others discover the project.
+
+---
+
+**Made with ❤️ and AI**

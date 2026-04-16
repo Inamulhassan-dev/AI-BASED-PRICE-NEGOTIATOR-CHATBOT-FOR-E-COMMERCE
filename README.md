@@ -97,9 +97,10 @@ Password: admin123
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
 pip install -r requirements.txt
+cp .env.example .env      # configure SECRET_KEY and other settings
 python init_demo_data.py
 uvicorn app.main:app --reload --port 8000
 ```
@@ -264,19 +265,33 @@ Full API documentation: http://localhost:8000/docs
 
 ## 🔧 Configuration
 
-### Backend Configuration
-Edit `backend/app/core/config.py`:
-```python
-SECRET_KEY = "your-secret-key"
-DATABASE_URL = "sqlite:///./negotiator.db"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+All backend settings are read from environment variables (or a `.env` file).
+An example file is provided — copy it and customise:
+
+```bash
+cp backend/.env.example backend/.env
+# then open backend/.env and set at least SECRET_KEY
+```
+
+Key variables (see `backend/.env.example` for the full list):
+
+| Variable | Default | Description |
+|---|---|---|
+| `SECRET_KEY` | `change-me-in-production` | **Change before deploying!** JWT signing key |
+| `DATABASE_URL` | `sqlite:///./negotiator.db` | SQLAlchemy DB URL |
+| `ALLOWED_ORIGINS` | `http://localhost:5173,...` | Comma-separated CORS origins |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | JWT lifetime |
+
+For **Docker / docker-compose**, copy the root-level example instead:
+
+```bash
+cp .env.example .env
 ```
 
 ### Frontend Configuration
-Edit `frontend/src/services/api.js`:
-```javascript
-const API_BASE_URL = 'http://localhost:8000'
-```
+The frontend talks to the backend through Vite's dev-server proxy (`/api → http://localhost:8000`).
+No code changes are needed for local development.
+For a custom backend URL, set `VITE_API_URL` in `frontend/.env` and update `frontend/vite.config.js`.
 
 ---
 

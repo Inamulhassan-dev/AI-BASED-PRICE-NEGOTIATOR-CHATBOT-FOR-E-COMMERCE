@@ -10,6 +10,8 @@ jobs:
   backend:
     name: Backend – install & smoke test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: backend
@@ -53,6 +55,8 @@ jobs:
   frontend:
     name: Frontend – install & build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: frontend

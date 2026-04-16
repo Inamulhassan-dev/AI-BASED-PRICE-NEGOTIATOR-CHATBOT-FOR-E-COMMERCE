@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite:///./negotiator.db
-      - SECRET_KEY=your-production-secret-key-change-me
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
     volumes:
       - ./backend:/app
